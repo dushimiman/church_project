@@ -63,6 +63,8 @@ if ($result->num_rows > 0) {
                     <th>Name</th>
                     <th>Church ID</th>
                     <th>Phone Number</th>
+                    <th>Ministry</th>
+                    <th>Category</th>
                 </tr>
             </thead>
             <tbody>
@@ -71,6 +73,8 @@ if ($result->num_rows > 0) {
                         <td><?php echo $christian['name']; ?></td>
                         <td><?php echo $christian['church_id']; ?></td>
                         <td><?php echo $christian['phone_number']; ?></td>
+                        <td><?php echo $christian['ministry']; ?></td>
+                        <td><?php echo $christian['category']; ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

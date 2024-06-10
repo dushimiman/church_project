@@ -1,0 +1,6 @@
+{
+    "require": {
+        "dompdf/dompdf": "^3.0",
+        "twbs/bootstrap": "4.1.3"
+    }
+}

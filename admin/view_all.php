@@ -36,6 +36,8 @@
                 <th>Church ID</th>
                 <th>Baptized</th>
                 <th>Phone Number</th>
+                <th>Ministy</th>
+                <th>Category</th>
             </tr>
         </thead>
         <tbody>
@@ -60,6 +62,8 @@
                     echo "<td>" . $row['church_id'] . "</td>";
                     echo "<td>" . ($row['baptized'] ? 'Yes' : 'No') . "</td>";
                     echo "<td>" . $row['phone_number'] . "</td>";
+                    echo "<td>" . $row['ministry'] . "</td>";
+                    echo "<td>" . $row['category'] . "</td>";
                     echo "</tr>";
                 }
             } else {

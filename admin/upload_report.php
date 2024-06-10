@@ -1,43 +1,87 @@
 <?php
-include '../config.php';
-session_start();
-if (!isset($_SESSION['admin'])) {
-    header("Location: ../login.php");
-    exit;
-}
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_FILES['report']) && $_FILES['report']['error'] == UPLOAD_ERR_OK) {
+        $targetDir = "uploads/";
+        
+        // Check if the uploads directory exists, if not, create it
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+        
+        $targetFile = $targetDir . basename($_FILES["report"]["name"]);
+        $uploadOk = 1;
+        $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["report_file"])) {
-    $report_name = $_POST['report_name'];
-    $target_dir = "../uploads/";
-    $target_file = $target_dir . basename($_FILES["report_file"]["name"]);
+        // Allow certain file formats
+        if($fileType != "pdf" && $fileType != "doc" && $fileType != "docx") {
+            echo "Sorry, only PDF, DOC, and DOCX files are allowed.";
+            $uploadOk = 0;
+        }
 
-    if (move_uploaded_file($_FILES["report_file"]["tmp_name"], $target_file)) {
-        $sql = "INSERT INTO reports (report_name, report_file) VALUES ('$report_name', '$target_file')";
-        if ($conn->query($sql) === TRUE) {
-            echo "Report uploaded successfully";
+        // Check if $uploadOk is set to 0 by an error
+        if ($uploadOk == 0) {
+            echo "Sorry, your file was not uploaded.";
         } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
+            if (move_uploaded_file($_FILES["report"]["tmp_name"], $targetFile)) {
+                // Insert report details into database
+                $servername = "localhost";
+                $username = "root";
+                $password = "";
+                $dbname = "church_database";
+
+                // Create connection
+                $conn = new mysqli($servername, $username, $password, $dbname);
+
+                // Check connection
+                if ($conn->connect_error) {
+                    die("Connection failed: " . $conn->connect_error);
+                }
+
+                // Escape special characters in the file name and file path
+                $reportName = $conn->real_escape_string(basename($_FILES["report"]["name"]));
+                $filePath = $conn->real_escape_string($targetFile);
+
+                $sql = "INSERT INTO reports (report_name, file_path) VALUES ('$reportName', '$filePath')";
+
+                if ($conn->query($sql) === TRUE) {
+                    echo "The file ". basename($_FILES["report"]["name"]). " has been uploaded.";
+                } else {
+                    echo "Error: " . $sql . "<br>" . $conn->error;
+                }
+
+                $conn->close();
+            } else {
+                echo "Sorry, there was an error uploading your file.";
+            }
         }
     } else {
-        echo "Sorry, there was an error uploading your file.";
+        echo "No file was uploaded or there was an upload error.";
     }
+} else {
+    echo "Invalid request.";
 }
 ?>
-<nav>
-    <ul>
-        <li><a href="register.php">Register New Christian</a></li>
-        <li><a href="view_all.php">View All Christians</a></li>
-        <li><a href="view_baptized.php">View Baptized Christians</a></li>
-        <li><a href="view_unbaptized.php">View Unbaptized Christians</a></li>
-        <li><a href="upload_report.php">Upload Report</a></li>
-        <li><a href="view_reports.php">View Reports</a></li>
-        <li><a href="../logout.php">Logout</a></li>
-    </ul>
-</nav>
 
-<!-- HTML for report upload form -->
-<form method="POST" enctype="multipart/form-data">
-    <input type="text" name="report_name" placeholder="Report Name" required>
-    <input type="file" name="report_file" required>
-    <button type="submit">Upload</button>
-</form>
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Report</title>
+</head>
+<body>
+    <h1>Upload Report</h1>
+    <form action="upload_report.php" method="post" enctype="multipart/form-data">
+        <label for="report">Choose a report to upload:</label>
+        <input type="file" name="report" id="report" required>
+        <button type="submit">Upload</button>
+    </form>
+</body>
+</html>
